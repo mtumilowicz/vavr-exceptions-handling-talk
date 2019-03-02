@@ -25,6 +25,29 @@
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
 			* to z kolei zwraca nulla, co też nie jest zbyt wygodne, bo potem wikłamy się w null-check
 1. Option / Optional jako podejście do modelowania istnieje / nie istnieje
-	
+	* przewagi Option? bogatsze API
+		* covariance (https://github.com/mtumilowicz/java11-covariance-contravariance-invariance) - chcemy supertyp
+			Option<String> a = Option.of("a");
+			Option<CharSequence> narrowed = Option.narrow(a);
+			* assertEquals(Option.of(1).map(composition), Option.of(1).map(nullFunction).map(toString));
+		* Option jest izomorficzny z jednoelementową listą (albo posiada element albo jest pusty, więc powinien być traktowany jako kolekcja)
+			* extends Iterable<T>
+			* Optional nie jest kolekcją
+		* konwersja z listy Optionów na Option od listy wartości
+			* Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b")));
+			* Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()));
+		* orElse które przyjmuje Option
+			* Repository.findById(1).orElse(Repository.findByName("Michal")
+			* w javie 11 też to dodali (or): findByName(person.getName()).or(() -> findById(person.getId())
+			* https://github.com/mtumilowicz/java11-optional
+	* Option jest poprawie napisany (w sensie teorii kategorii) (https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
+		* z optionalem tak nie jest (map zmienia kontekst obliczeń - potrafi przełączyć na empty gdy funkcja zwraca null - poważny błąd projektowy)
+			Function<Integer, Integer> nullFunction = i -> null;
+			Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
+			Function<Integer, String> composition = nullFunction.andThen(toString);
+			
+			assertNotEquals(Optional.of(1).map(composition), Optional.of(1).map(nullFunction).map(toString));
+			assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
 	* https://github.com/mtumilowicz/java11-vavr-option
-	* https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor
+1. niestety nie wszytko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
+	* można myśleć o vavrowym Try jako o odpowiedniku try-catch-finally zencapsulowanym w obiekt
