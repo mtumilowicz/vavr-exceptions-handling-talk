@@ -56,4 +56,50 @@
 	        ```
 	* https://github.com/mtumilowicz/java11-vavr-option
 1. niestety nie wszytko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
+    * `Try` is a monadic container type which represents a computation 
+      that may either result in an exception, or return a successfully 
+      computed value. Instances of `Try`, are either an instance of 
+      `Success` or `Failure`
 	* można myśleć o vavrowym `Try` jako o odpowiedniku try-catch-finally zencapsulowanym w obiekt
+	* parsing integer
+	    ```
+        Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("a"));
+        
+        assertTrue(parseInteger.isFailure());
+        ```
+    * try with resources
+        * java
+            ```
+            String fileName = "NonExistingFile.txt";
+            
+            String fileLines;
+            try (var stream = Files.lines(Paths.get(fileName))) {
+            
+                fileLines = stream.collect(joining(","));
+            }
+            ```
+        * vavr
+            ```
+            String fileName = "src/test/resources/lines.txt";
+            Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
+                            .of(stream -> stream.collect(joining(",")));
+            ```
+            * success
+                ```
+                String fileName = "src/test/resources/lines.txt";
+                
+                Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
+                        .of(stream -> stream.collect(joining(",")));
+                
+                assertTrue(fileLines.isSuccess());
+                assertThat(fileLines.get(), is("1,2,3"));
+                ```
+            * failure
+                ```
+                String fileName = "NonExistingFile.txt";
+                
+                Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
+                        .of(stream -> stream.collect(joining(",")));
+                
+                assertTrue(fileLines.isFailure());
+                ```
