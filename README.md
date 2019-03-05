@@ -18,7 +18,7 @@
 	* queue
 		* (queue) `boolean add(E e)` - `IllegalStateException` if the element cannot be added at this time due to capacity restrictions
 		* (blocking queue) `boolean offer(E e)` - returns true if the element was added to this queue, else false 
-		(blocking queue ma jakieś capacity, to że nie można dodać kolejnej rzeczy do kolejki nie powinien być sytuacją wyjątkową)
+		(blocking queue ma jakieś capacity, to że nie można dodać kolejnej rzeczy do kolejki nie powinno być sytuacją wyjątkową)
 	* nie znalezienie encji w bazie danych wg specyfikacji JPA
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#getReference-java.lang.Class-java.lang.Object-
 			* `EntityNotFoundException`
@@ -26,26 +26,22 @@
 			* to z kolei zwraca `null`, co też nie jest zbyt wygodne, bo potem wikłamy się w null-check
 1. `Option` / `Optional` jako podejście do modelowania istnieje / nie istnieje
 	* przewagi `Option` - bogatsze API
-		* covariance (https://github.com/mtumilowicz/java11-covariance-contravariance-invariance) - chcemy supertyp
-		    ```
-			Option<String> a = Option.of("a");
-			Option<CharSequence> narrowed = Option.narrow(a);
-			```
 		* Option jest izomorficzny z jednoelementową listą (albo posiada element albo jest pusty, więc powinien być 
 		traktowany jako kolekcja)
 			* `extends Iterable<T>`
 			* Optional nie jest kolekcją
-		* konwersja z listy `Option` na `Option` od listy wartości
+		* konwersja z listy `List<Option<T>>` na `Option<List<T>>`
 			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b")))`
 			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()))`
 		* `orElse` które przyjmuje `Option`
 			* `Repository.findById(1).orElse(() -> Repository.findByName("Michal"))`
 			* w javie 11 też to dodali (`or`): `findByName(person.getName()).or(() -> findById(person.getId())`
 			* https://github.com/mtumilowicz/java11-optional
-	* Option jest poprawie napisany (w sensie teorii kategorii) 
+    * jest serializowany
+	* `Option` jest poprawie napisany (w sensie teorii kategorii) 
 	(https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
-		* z optionalem tak nie jest (map zmienia kontekst obliczeń - potrafi przełączyć na empty gdy funkcja zwraca 
-		`null` - poważny błąd projektowy)
+		* z optionalem tak nie jest (map zmienia kontekst obliczeń - przełącza kontekst na empty gdy funkcja zwraca 
+		`null` - kolejny poważny błąd projektowy)
 		    ```
 			Function<Integer, Integer> nullFunction = i -> null;
 			Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
@@ -55,12 +51,15 @@
 			assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
 	        ```
 	* https://github.com/mtumilowicz/java11-vavr-option
-1. niestety nie wszytko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
+1. niestety nie wszystko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
     * `Try` is a monadic container type which represents a computation 
-      that may either result in an exception, or return a successfully 
+      that may either result in an exception (`Throwable`), or return a successfully 
       computed value. Instances of `Try`, are either an instance of 
       `Success` or `Failure`
 	* można myśleć o vavrowym `Try` jako o odpowiedniku try-catch-finally zencapsulowanym w obiekt
+	* `interface Try<T>`
+	    * `final class Success<T> implements Try<T>, Serializable`
+	    * `final class Failure<T> implements Try<T>, Serializable`
 	* parsing integer
 	    ```
         Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("a"));
@@ -103,3 +102,8 @@
                 
                 assertTrue(fileLines.isFailure());
                 ```
+    * https://github.com/mtumilowicz/java11-vavr-try
+1. informacyjnie: try to tylko przelotka (i tak trzeba tworzyć te wyjątki, co jest kosztowne), więc może możnaby
+opuścić założenie o tym, że Try ma albo sukces albo `Throwable`? Jest taka struktura - `Either` - to jest tak jakby
+para, która ma albo lewą stronę albo prawą; zwyczajowo po prawej jest sukces a po lewej raport z porażki (konwencja)
+1. 
