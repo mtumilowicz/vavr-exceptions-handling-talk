@@ -173,3 +173,118 @@ That structure is called `Either`.
         
         Function2<Integer, Integer, Try<Integer>> lifted = Function2.liftTry(divide);
         ```
+    * **workshops**: https://github.com/mtumilowicz/java11-vavr093-partial-function-lifting-workshop
+1. Mentioned earlier API: `Option`, `Try`, `Either`, function lifting is not applicable to objects validation
+    * no easy way to aggregate errors
+    * computations are broken after first failure
+    * we need a structure that is so-called applicative
+    * vavr `Validation` control is an applicative functor and facilitates accumulating errors
+        * we want to validate incoming request:
+            ```
+            @Builder
+            @Value
+            class PersonRequest {
+                String name;
+                AddressRequest address;
+                List<String> emails;
+                int age;
+            }
+            ```
+        * if valid, we want to return:
+            ```
+            @Builder
+            @Value
+            public class ValidPersonRequest {
+                Word name;
+                ValidAddressRequest address;
+                Emails emails;
+                Age age;
+            }
+            ```
+        * if not valid, we want to return aggregated errors: for example `Seq<String>`
+        * Validator
+            ```
+            public class PersonRequestValidation {
+                public static Validation<Seq<String>, ValidPersonRequest> validate(PersonRequest request) {
+            
+                    return Validation
+                            .combine(
+                                    Word.validate(request.getName()),
+                                    Email.validate(request.getEmails()).mapError(error -> error.mkString(", ")),
+                                    AddressRequestValidation.validate(request.getAddress()).mapError(error -> error.mkString(", ")),
+                                    NumberValidation.positive(request.getAge()))
+                            .ap((name, emails, address, age) -> ValidPersonRequest.builder()
+                                    .name(Word.of(name))
+                                    .emails(emails.map(Email::of).transform(Emails::new))
+                                    .address(address)
+                                    .age(Age.of(age))
+                                    .build());
+                }
+            }
+            ```
+        * we could easily send invalid request to the `PatchService`
+        * we dont need any infrastructure providers (AOP, dynamic proxies, DI)
+        * only 8 slots in combine
+    * JSR303: https://github.com/mtumilowicz/java11-jsr303-custom-validation (do we need workshops?)
+        * entity
+            ```
+            @Value
+            @Builder
+            public class User {
+            
+                @NotBlank
+                @Word
+                String name;
+            
+                @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+                public User(@JsonProperty("name") String name) {
+                    this.name = name;
+                }
+            }
+            ```
+        * annotation
+            ```
+            @Constraint(validatedBy = WordValidator.class)
+            @Target(ElementType.FIELD)
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface Word {
+                String message() default "is not a proper word!";
+                Class<?>[] groups() default {};
+                Class<? extends Payload>[] payload() default {};
+            }
+            ```
+        * validator
+            ```
+            class WordValidator implements ConstraintValidator<Word, String> {
+            
+                private static final Predicate<String> PATTERN = Pattern.compile("[\\w]+").asMatchPredicate();
+            
+                @Override
+                public void initialize(Word word) {
+                }
+            
+                @Override
+                public boolean isValid(String word,
+                                       ConstraintValidatorContext cxt) {
+                    return isNull(word) || PATTERN.test(word);
+                }
+            
+            }
+            ```
+        * endpoint
+            ```
+            @RestController
+            @RequestMapping("/users")
+            public class UserController {
+                
+                @PostMapping("register")
+                public ResponseEntity<User> register(@RequestBody @Valid User user) {
+                    return ResponseEntity.ok(user);
+                }
+            }
+            ```
+        * bad request is rejected and it is hard to intercept it in a reasonable way
+        * we need infrastructure providers (AOP, dynamic proxies, DI)
+        * instead of creating domain objects we create annotations - objects still could be created in an invalid
+        state
+    * **workshops**: https://github.com/mtumilowicz/java11-vavr093-validation-workshop
