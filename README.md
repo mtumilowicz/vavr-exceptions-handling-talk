@@ -92,7 +92,8 @@
       that may either result in an exception (`Throwable`), or return a successfully 
       computed value. Instances of `Try`, are either an instance of 
       `Success` or `Failure`
-    * you can think about `Try` as a pair (`Throwable`, `Result`) that has either left value or right
+    * you can think about `Try` as a pair `(Failure, Success) ~ (Throwable, Object)` 
+        that has either left value or right
 	* you can think about `Try` as an object representation of try-catch-finally 
 	* `interface Try<T>`
 	    * `final class Success<T> implements Try<T>, Serializable`
@@ -148,7 +149,8 @@
                 assertTrue(fileLines.isFailure());
                 ```
     * https://github.com/mtumilowicz/java11-vavr-try
-1. informacyjnie: try to tylko przelotka (i tak trzeba tworzyć te wyjątki, co jest kosztowne), więc może możnaby
+1. 
+informacyjnie: try to tylko przelotka (i tak trzeba tworzyć te wyjątki, co jest kosztowne), więc może możnaby
 opuścić założenie o tym, że Try ma albo sukces albo `Throwable`? Jest taka struktura - `Either` - to jest tak jakby
 para, która ma albo lewą stronę albo prawą; zwyczajowo po prawej jest sukces a po lewej raport z porażki (konwencja)
 1. 
