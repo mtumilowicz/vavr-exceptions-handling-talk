@@ -82,7 +82,7 @@
 			
 			assertEquals(Option.of(1).map(composition), Option.of(1).map(nullFunction).map(toString));
 			assertNotEquals(Optional.of(1).map(composition), Optional.of(1).map(nullFunction).map(toString));
-			assertEquals(Optional.of(1).stream().map(composition).findAny(), 		Optional.of(1).stream().map(nullFunction).map(toString).findAny());
+			assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
 	       		```
 	* **workshops**: https://github.com/mtumilowicz/java11-vavr093-option-workshop
 1. niestety nie wszystko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
