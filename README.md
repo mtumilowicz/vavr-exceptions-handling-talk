@@ -53,17 +53,17 @@
 		Jmh.exceptionWithoutStackTrace  thrpt    4  68883171,304 ± 19209621,332  ops/s
 		Jmh.runtimeException            thrpt    4    600517,626 ±   686481,438  ops/s
 		```
-1. wyjątki są nadużywane, a powinny modelować tylko sytuacje wyjątkowe
+1. exceptions are overused - there should model only exceptional behaviours
 	* queue
 		* (queue) `boolean add(E e)` - `IllegalStateException` if the element cannot be added at this time due to capacity restrictions
 		* (blocking queue) `boolean offer(E e)` - returns true if the element was added to this queue, else false 
 		(blocking queue ma jakieś capacity, to że nie można dodać kolejnej rzeczy do kolejki nie powinno być sytuacją wyjątkową)
-	* nie znalezienie encji w bazie danych wg specyfikacji JPA
+	* JPA specification - entity cannot be found in the database
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#getReference-java.lang.Class-java.lang.Object-
-			* `EntityNotFoundException`
+			* throws `EntityNotFoundException`
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
-			* to z kolei zwraca `null`, co też nie jest zbyt wygodne, bo potem wikłamy się w null-check
-1. `Option` / `Optional` jako podejście do modelowania istnieje / nie istnieje
+			* returns `null`, so we are supposably involved in further null-checks or `NullPointerException`
+1. `Option` / `Optional` as a approach to modelling exists / not exists of the result
 	* przewagi `Option` - bogatsze API
 		* Option jest izomorficzny z jednoelementową listą (albo posiada element albo jest pusty, więc powinien być 
 		traktowany jako kolekcja)
