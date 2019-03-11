@@ -75,7 +75,8 @@
 			* java 11: `CacheRepository.findById(1).or(() -> DatabaseRepository.findById(1))`
 			* more info about `Optional` in java 11: https://github.com/mtumilowicz/java11-optional
     	* `Serializable`
-		* `Option` complies with category theory rules, contrary to `Optional` (https://github.com/mtumilowicz/java11-category-
+		* `Option` complies with category theory rules, contrary to `Optional` 
+		(https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
 		    ```
 		    Function<Integer, Integer> nullFunction = i -> null;
 		    Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
@@ -86,20 +87,29 @@
 		    assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
 	        ```
 	* **workshops**: https://github.com/mtumilowicz/java11-vavr093-option-workshop
-1. niestety nie wszystko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
+1. not everything could be modelled as exists / not exists - we need more flexible API
     * `Try` is a monadic container type which represents a computation 
       that may either result in an exception (`Throwable`), or return a successfully 
       computed value. Instances of `Try`, are either an instance of 
       `Success` or `Failure`
-	* można myśleć o vavrowym `Try` jako o odpowiedniku try-catch-finally zencapsulowanym w obiekt
+    * you can think about `Try` as a pair (`Throwable`, `Result`) that has either left value or right
+	* you can think about `Try` as an object representation of try-catch-finally 
 	* `interface Try<T>`
 	    * `final class Success<T> implements Try<T>, Serializable`
 	    * `final class Failure<T> implements Try<T>, Serializable`
 	* parsing integer
+        ```
+        Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("1"));
+        
+        assertTrue(parseInteger.isSuccess());
+        assertThat(parseInteger.get(), is(1));
+        ```
 	    ```
         Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("a"));
-        
+
         assertTrue(parseInteger.isFailure());
+        assertTrue(parseInteger.getCause() instanceof NumberFormatException);
+        assertThat(parseInteger.getCause().getMessage(), is("For input string: \"a\""));
         ```
     * try with resources
         * java
