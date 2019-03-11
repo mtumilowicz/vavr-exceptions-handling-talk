@@ -7,11 +7,11 @@
 	* what is stack
 		* holds local variables and partial results, and plays a part in method invocation and return
 	* what is frame
-	    	* invocation context of a method
+		* invocation context of a method
 	* more precise info:
 		* theory: https://github.com/mtumilowicz/java-stack
-			* https://github.com/mtumilowicz/java8-stack-stackwalking
-			* https://github.com/mtumilowicz/java9-stack-stackwalking
+			* stackwalking on java 8: https://github.com/mtumilowicz/java8-stack-stackwalking
+			* stackwalking on java 9: https://github.com/mtumilowicz/java9-stack-stackwalking
 1. throwing exceptions is expensive
 	* `fillInStackTrace` - records within this Throwable object information about the current state of the stack frames for the current thread
 	* stack unwinding - process of destroying local objects and calling destructors (synonymous with the end of a function call and the subsequent popping of the stack)
