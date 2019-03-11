@@ -167,7 +167,7 @@ That structure is called `Either`.
         
         Function2<Integer, Integer, Option<Integer>> lifted = Function2.lift(divide);
         ```
-    * lifting function to `Try`
+    * lifting function with `Try`
         ```
         Function2<Integer, Integer, Integer> divide = (a, b) -> a / b;
         
