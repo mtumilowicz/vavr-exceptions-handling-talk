@@ -1,15 +1,20 @@
 # vavr-exceptions-handling-talk
 
-1. wstęp
-	* ile thread zajmuje w pamięci
-	* co to stack
-	* co to frame
+1. preface
+	* how much memory a thread takes in java
+		* 1024KB
+		* -Xss
+	* what is stack
+	* what is frame
 	* https://github.com/mtumilowicz/java-stack
 		* https://github.com/mtumilowicz/java8-stack-stackwalking
 		* https://github.com/mtumilowicz/java9-stack-stackwalking
-1. rzucanie exceptionow jest drogie
-	* `fillInStackTrace`
-	* stack unwinding
+1. throwing exceptions is expensive
+	* `fillInStackTrace` - records within this Throwable object information about the current state of the stack frames for the current thread
+	* stack unwinding - process of destroying local objects and calling destructors (synonymous with the end of a function call and the subsequent popping of the stack)
+		* unwinding the method-call stack means that the method in which the exception was not caught terminates, all local variables in that method go out of scope and control returns to the statement that originally invoked that method
+                * if a try block encloses that statement, an attempt is made to catch the exception
+                * if a try block does not enclose that statement, stack unwinding occurs again
 	* nie potrzebujemy zazwyczaj zrzutu calego stacku, tylko kilka (górnych) linii
 	* koszt: koszt stworzenia wyjatku (niedeterministyczny - zalezny od wielkosci stacka) + stack unwinding
 	* https://github.com/mtumilowicz/java11-exceptions-creating-exceptions-without-stacktrace
