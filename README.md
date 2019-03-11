@@ -72,18 +72,19 @@
 			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()))`, `sequence` is `Option.none()`
 		* `orElse` które przyjmuje `Option`
 			* `CacheRepository.findById(1).orElse(() -> DatabaseRepository.findById(1))`
-			* java 11 also provides that method (`or`): `CacheRepository.findById(1).or(() -> DatabaseRepository.findById(1))`, more info about `Optional` from java 11: https://github.com/mtumilowicz/java11-optional
-    		* `Serializable`
+			* java 11: `CacheRepository.findById(1).or(() -> DatabaseRepository.findById(1))`
+			* more info about `Optional` in java 11: https://github.com/mtumilowicz/java11-optional
+    	* `Serializable`
 		* `Option` complies with category theory rules, contrary to `Optional` (https://github.com/mtumilowicz/java11-category-
-		```
-		Function<Integer, Integer> nullFunction = i -> null;
-		Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
-		Function<Integer, String> composition = nullFunction.andThen(toString);
-			
-		assertEquals(Option.of(1).map(composition), Option.of(1).map(nullFunction).map(toString));
-		assertNotEquals(Optional.of(1).map(composition), Optional.of(1).map(nullFunction).map(toString));
-		assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
-	       	```
+		    ```
+		    Function<Integer, Integer> nullFunction = i -> null;
+		    Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
+		    Function<Integer, String> composition = nullFunction.andThen(toString);
+		    	
+		    assertEquals(Option.of(1).map(composition), Option.of(1).map(nullFunction).map(toString));
+		    assertNotEquals(Optional.of(1).map(composition), Optional.of(1).map(nullFunction).map(toString));
+		    assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
+	        ```
 	* **workshops**: https://github.com/mtumilowicz/java11-vavr093-option-workshop
 1. niestety nie wszystko da się zamodelować jako istnieje / nie istnieje i potrzebujemy bogatszego API (Try)
     * `Try` is a monadic container type which represents a computation 
