@@ -2,8 +2,8 @@
 
 1. preface
 	* how much memory a thread takes in java
-		* 1024KB
-		* -Xss
+		* `1024KB`
+		* `-Xss`
 	* what is stack
 		* holds local variables and partial results, and plays a part in method invocation and return
 	* what is frame
@@ -13,15 +13,46 @@
 			* stackwalking on java 8: https://github.com/mtumilowicz/java8-stack-stackwalking
 			* stackwalking on java 9: https://github.com/mtumilowicz/java9-stack-stackwalking
 1. throwing exceptions is expensive
-	* `fillInStackTrace` - records within this Throwable object information about the current state of the stack frames for the current thread
+	* `fillInStackTrace` - records within this `Throwable` object information about the current state of the stack frames for the current thread
 	* stack unwinding - process of destroying local objects and calling destructors (synonymous with the end of a function call and the subsequent popping of the stack)
 		* unwinding the method-call stack means that the method in which the exception was not caught terminates, all local variables in that method go out of scope and control returns to the statement that originally invoked that method
                 * if a try block encloses that statement, an attempt is made to catch the exception
                 * if a try block does not enclose that statement, stack unwinding occurs again
-	* nie potrzebujemy zazwyczaj zrzutu calego stacku, tylko kilka (górnych) linii
-	* koszt: koszt stworzenia wyjatku (niedeterministyczny - zalezny od wielkosci stacka) + stack unwinding
-	* https://github.com/mtumilowicz/java11-exceptions-creating-exceptions-without-stacktrace
-	* https://github.com/mtumilowicz/java11-exceptions-throwing-exceptions-is-expensive
+	* general cost: creation cost (nondeterministic - depends on the stack size) + stack unwinding
+	* usually we don't want to dump all the stack, but just a few top lines
+	* it is possible to create exception without filling stacktrace: https://github.com/mtumilowicz/java11-exceptions-creating-exceptions-without-stacktrace
+		* dedicated constructor
+			```
+			protected Exception(String message, Throwable cause,
+					    boolean enableSuppression,
+					    boolean writableStackTrace) {
+			    super(message, cause, enableSuppression, writableStackTrace);
+			}
+			```
+			```
+			class ExceptionWithoutStackTrace extends RuntimeException {
+			    ExceptionWithoutStackTrace() {
+				super(null, null, false, false);
+			    }
+			}
+			```
+		* overridding `fillInStackTrace` method
+			```
+			class ExceptionWithOverriddenFillInStackTrace extends RuntimeException {
+
+			    @Override
+			    public synchronized Throwable fillInStackTrace() {
+				return this;
+			    }
+			}
+			```
+	* measured with JMH: https://github.com/mtumilowicz/java11-exceptions-throwing-exceptions-is-expensive
+		```
+		Benchmark                        Mode  Cnt         Score          Error  Units
+		Jmh.exceptionWithStackTrace     thrpt    4    657794,785 ±    48723,978  ops/s
+		Jmh.exceptionWithoutStackTrace  thrpt    4  68883171,304 ± 19209621,332  ops/s
+		Jmh.runtimeException            thrpt    4    600517,626 ±   686481,438  ops/s
+		```
 1. wyjątki są nadużywane, a powinny modelować tylko sytuacje wyjątkowe
 	* queue
 		* (queue) `boolean add(E e)` - `IllegalStateException` if the element cannot be added at this time due to capacity restrictions
