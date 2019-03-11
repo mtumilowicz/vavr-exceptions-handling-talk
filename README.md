@@ -148,9 +148,28 @@
                 
                 assertTrue(fileLines.isFailure());
                 ```
-    * https://github.com/mtumilowicz/java11-vavr-try
-1. 
-informacyjnie: try to tylko przelotka (i tak trzeba tworzyć te wyjątki, co jest kosztowne), więc może możnaby
-opuścić założenie o tym, że Try ma albo sukces albo `Throwable`? Jest taka struktura - `Either` - to jest tak jakby
-para, która ma albo lewą stronę albo prawą; zwyczajowo po prawej jest sukces a po lewej raport z porażki (konwencja)
-1. 
+    * **workshops**: https://github.com/mtumilowicz/java11-vavr093-try-workshop
+1. `Try` is just a very handy wrapper - we still have to create exceptions and deal with its cost - maybe there is
+a structure that `(Object, Object)` with convention that on the left side we have failure and on the right - success?
+That structure is called `Either`.
+1. Function lifting
+    * partial function from `X` to `Y` is a function `f: X′ → Y`, 
+                       for some `X′ c X`. For `x e X\X′` function is undefined
+    * in programming - if partial function is called with a disallowed 
+                       input value, it will typically throw an exception
+    * in programming - we **lift** function `f` to `f′: X -> Option<Y>` in such a manner:
+        * `f′(x).get() = f(x)` on `X′`
+        * `f′(x) = Option.none()` for `x e X\X′`                   
+    * we could lift function with `Try`
+    * lifting function with `Option`
+        ```
+        Function2<Integer, Integer, Integer> divide = (a, b) -> a / b;
+        
+        Function2<Integer, Integer, Option<Integer>> lifted = Function2.lift(divide);
+        ```
+    * lifting function to `Try`
+        ```
+        Function2<Integer, Integer, Integer> divide = (a, b) -> a / b;
+        
+        Function2<Integer, Integer, Try<Integer>> lifted = Function2.liftTry(divide);
+        ```
