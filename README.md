@@ -63,20 +63,17 @@
 			* throws `EntityNotFoundException`
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
 			* returns `null`, so we are supposably involved in further null-checks or `NullPointerException`
-1. `Option` / `Optional` as a approach to modelling exists / not exists of the result
-	* przewagi `Option` - bogatsze API
-		* Option jest izomorficzny z jednoelementową listą (albo posiada element albo jest pusty, więc powinien być 
-		traktowany jako kolekcja)
-			* `extends Iterable<T>`
-			* Optional nie jest kolekcją
-		* konwersja z listy `List<Option<T>>` na `Option<List<T>>`
+1. `Option` / `Optional` as a approach to modelling exists / not exists of the result, but `Option` is better:
+	* bigger, more flexible API
+		* `Option` is isomorphic to singleton list (either has element or not, so it could be treated as collection)
+			* `extends Iterable<T>` (`Optional` is not a collection)
+		* conversion `List<Option<T>> -> Option<List<T>>`
 			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b")))`
-			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()))`
+			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()))`, `sequence` is `Option.none()`
 		* `orElse` które przyjmuje `Option`
-			* `Repository.findById(1).orElse(() -> Repository.findByName("Michal"))`
-			* w javie 11 też to dodali (`or`): `findByName(person.getName()).or(() -> findById(person.getId())`
-			* https://github.com/mtumilowicz/java11-optional
-    * jest serializowany
+			* `CacheRepository.findById(1).orElse(() -> DatabaseRepository.findById(1))`
+			* java 11 also provides that method (`or`): `CacheRepository.findById(1).or(() -> DatabaseRepository.findById(1))`, more info about `Optional` from java 11: https://github.com/mtumilowicz/java11-optional
+    * `serializable`
 	* `Option` jest poprawie napisany (w sensie teorii kategorii) 
 	(https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
 		* z optionalem tak nie jest (map zmienia kontekst obliczeń - przełącza kontekst na empty gdy funkcja zwraca 
