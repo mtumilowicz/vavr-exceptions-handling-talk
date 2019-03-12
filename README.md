@@ -9,7 +9,9 @@
 		* holds local variables and partial results, and plays a part in method invocation and return
 		* stores frames
 	* what is frame
+	    * new frame is created each time a method is invoked
 		* invocation context of a method
+		* pushed on top
 	* more precise info:
 		* theory: https://github.com/mtumilowicz/java-stack
 			* stackwalking on java 8: https://github.com/mtumilowicz/java8-stack-stackwalking
@@ -73,7 +75,7 @@
     	* `Serializable`
 	* **workshops**: https://github.com/mtumilowicz/java11-vavr093-option-workshop
 1. not everything could be modelled as exists / not exists - we need more flexible API
-    * `Try` is a monadic container type which represents a computation 
+    * `Try` models a computation 
       that may either result in an exception (`Throwable`), or return a successfully 
       computed value. Instances of `Try`, are either an instance of 
       `Success` or `Failure`
