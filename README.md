@@ -63,17 +63,13 @@
 			* throws `EntityNotFoundException`
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
 			* returns `null`, so we are supposably involved in further null-checks or `NullPointerException`
-1. `Option` / `Optional` as a approach to modelling exists / not exists of the result, but `Option` is better:
-	* bigger, more flexible API
-		* `Option` is isomorphic to singleton list (either has element or not, so it could be treated as collection)
-			* `extends Iterable<T>` (`Optional` is not a collection)
+1. `Option` as a way of modelling exists / not exists
+	* bigger, more flexible API than `Optional`
+		* `extends Iterable<T>` - `Option` is isomorphic to singleton list (either has element or not, so it could be treated as collection)
 		* conversion `List<Option<T>> -> Option<List<T>>`
 			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b")))`
-			* `Option<Seq<String>> sequence = Option.sequence(List.of(Option.of("a"), Option.of("b"), Option.none()))`, `sequence` is `Option.none()`
-		* `orElse` które przyjmuje `Option`
+		* `orElse` supplier of `Option`
 			* `CacheRepository.findById(1).orElse(() -> DatabaseRepository.findById(1))`
-			* java 11: `CacheRepository.findById(1).or(() -> DatabaseRepository.findById(1))`
-			* more info about `Optional` in java 11: https://github.com/mtumilowicz/java11-optional
     	* `Serializable`
 		* `Option` complies with category theory rules, contrary to `Optional` 
 		(https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
@@ -93,25 +89,27 @@
       computed value. Instances of `Try`, are either an instance of 
       `Success` or `Failure`
     * you can think about `Try` as a pair `(Failure, Success) ~ (Throwable, Object)` 
-        that has either left value or right
+        that has either left or right value
 	* you can think about `Try` as an object representation of try-catch-finally 
-	* `interface Try<T>`
+	* `interface Try<T>` has two implementations:
 	    * `final class Success<T> implements Try<T>, Serializable`
 	    * `final class Failure<T> implements Try<T>, Serializable`
 	* parsing integer
-        ```
-        Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("1"));
-        
-        assertTrue(parseInteger.isSuccess());
-        assertThat(parseInteger.get(), is(1));
-        ```
-	    ```
-        Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("a"));
-
-        assertTrue(parseInteger.isFailure());
-        assertTrue(parseInteger.getCause() instanceof NumberFormatException);
-        assertThat(parseInteger.getCause().getMessage(), is("For input string: \"a\""));
-        ```
+	    * success
+            ```
+            Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("1"));
+            
+            assertTrue(parseInteger.isSuccess());
+            assertThat(parseInteger.get(), is(1));
+            ```
+        * failure
+            ```
+            Try<Integer> parseInteger = Try.of(() -> Integer.valueOf("a"));
+    
+            assertTrue(parseInteger.isFailure());
+            assertTrue(parseInteger.getCause() instanceof NumberFormatException);
+            assertThat(parseInteger.getCause().getMessage(), is("For input string: \"a\""));
+            ```
     * try with resources
         * java
             ```
@@ -149,7 +147,7 @@
                 assertTrue(fileLines.isFailure());
                 ```
     * **workshops**: https://github.com/mtumilowicz/java11-vavr093-try-workshop
-1. `Try` is just a very handy wrapper - we still have to create exceptions and deal with its cost - maybe there is
+1. Digression: `Try` is just a very handy wrapper - we still have to create exceptions and deal with its cost - maybe there is
 a structure that `(Object, Object)` with convention that on the left side we have failure and on the right - success?
 That structure is called `Either`.
 1. Function lifting
@@ -174,7 +172,7 @@ That structure is called `Either`.
         Function2<Integer, Integer, Try<Integer>> lifted = Function2.liftTry(divide);
         ```
     * **workshops**: https://github.com/mtumilowicz/java11-vavr093-partial-function-lifting-workshop
-1. Mentioned earlier API: `Option`, `Try`, `Either`, function lifting is not applicable to objects validation
+1. Mentioned earlier API: `Option`, `Try`, `Either`, function lifting - are not applicable to objects validation
     * no easy way to aggregate errors
     * computations are broken after first failure
     * we need a structure that is so-called applicative
