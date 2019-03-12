@@ -15,9 +15,6 @@
 1. throwing exceptions is expensive
 	* `fillInStackTrace` - records within this `Throwable` object information about the current state of the stack frames for the current thread
 	* stack unwinding - process of destroying local objects and calling destructors (synonymous with the end of a function call and the subsequent popping of the stack)
-		* unwinding the method-call stack means that the method in which the exception was not caught terminates, all local variables in that method go out of scope and control returns to the statement that originally invoked that method
-		* if a try block encloses that statement, an attempt is made to catch the exception
-		* if a try block does not enclose that statement, stack unwinding occurs again
 	* general cost: creation cost (nondeterministic - depends on the stack size) + stack unwinding
 	* usually we don't want to dump all the stack, but just a few top lines
 	* it is possible to create exception without filling stacktrace: https://github.com/mtumilowicz/java11-exceptions-creating-exceptions-without-stacktrace
