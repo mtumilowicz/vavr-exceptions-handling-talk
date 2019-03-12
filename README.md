@@ -5,7 +5,9 @@
 		* `1024KB`
 		* `-Xss`
 	* what is stack
+	    * each thread in a JVM has its own JVM stack
 		* holds local variables and partial results, and plays a part in method invocation and return
+		* stores frames
 	* what is frame
 		* invocation context of a method
 	* more precise info:
