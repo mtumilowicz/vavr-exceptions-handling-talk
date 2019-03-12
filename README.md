@@ -56,13 +56,14 @@
 1. exceptions are overused - there should model only exceptional behaviours
 	* queue
 		* (queue) `boolean add(E e)` - `IllegalStateException` if the element cannot be added at this time due to capacity restrictions
-		* (blocking queue) `boolean offer(E e)` - returns true if the element was added to this queue, else false 
-		(blocking queue ma jakieś capacity, to że nie można dodać kolejnej rzeczy do kolejki nie powinno być sytuacją wyjątkową)
+		* (blocking queue) `boolean offer(E e)` - returns true if the element was added to this queue, else false;
+		when using a capacity-restricted queue, this method is generally preferable to add, which can fail to insert 
+		an element only by throwing an exception (because in bounded queues it is not an exceptional behaviour)
 	* JPA specification - entity cannot be found in the database
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#getReference-java.lang.Class-java.lang.Object-
 			* throws `EntityNotFoundException`
 		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
-			* returns `null`, so we are supposably involved in further null-checks or `NullPointerException`
+			* returns `null`, so we are involved in further null-checks or `NullPointerException`
 1. `Option` as a way of modelling exists / not exists
 	* bigger, more flexible API than `Optional`
 		* `extends Iterable<T>` - `Option` is isomorphic to singleton list (either has element or not, so it could be treated as collection)
@@ -71,17 +72,6 @@
 		* `orElse` supplier of `Option`
 			* `CacheRepository.findById(1).orElse(() -> DatabaseRepository.findById(1))`
     	* `Serializable`
-		* `Option` complies with category theory rules, contrary to `Optional` 
-		(https://github.com/mtumilowicz/java11-category-theory-optional-is-not-functor)
-		    ```
-		    Function<Integer, Integer> nullFunction = i -> null;
-		    Function<Integer, String> toString = i -> nonNull(i) ? String.valueOf(i) : "null";
-		    Function<Integer, String> composition = nullFunction.andThen(toString);
-		    	
-		    assertEquals(Option.of(1).map(composition), Option.of(1).map(nullFunction).map(toString));
-		    assertNotEquals(Optional.of(1).map(composition), Optional.of(1).map(nullFunction).map(toString));
-		    assertEquals(Optional.of(1).stream().map(composition).findAny(), Optional.of(1).stream().map(nullFunction).map(toString).findAny());
-	        ```
 	* **workshops**: https://github.com/mtumilowicz/java11-vavr093-option-workshop
 1. not everything could be modelled as exists / not exists - we need more flexible API
     * `Try` is a monadic container type which represents a computation 
