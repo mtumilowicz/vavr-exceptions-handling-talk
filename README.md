@@ -57,9 +57,9 @@
 		when using a capacity-restricted queue, this method is generally preferable to add, which can fail to insert 
 		an element only by throwing an exception (because in bounded queues it is not an exceptional behaviour)
 	* JPA specification - entity cannot be found in the database
-		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#getReference-java.lang.Class-java.lang.Object-
+		* `<T> T getReference(Class<T> entityClass, Object primaryKey)`
 			* throws `EntityNotFoundException`
-		* https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html#find-java.lang.Class-java.lang.Object-
+		* `<T> T find(Class<T> entityClass, Object primaryKey)`
 			* returns `null`, so we are involved in further null-checks or `NullPointerException`
 1. `Option` as a way of modelling exists / not exists
 	* bigger, more flexible API than `Optional`
@@ -78,9 +78,6 @@
     * you can think about `Try` as a pair `(Failure, Success) ~ (Throwable, Object)` 
         that has either left or right value
 	* you can think about `Try` as an object representation of try-catch-finally 
-	* `interface Try<T>` has two implementations:
-	    * `final class Success<T> implements Try<T>, Serializable`
-	    * `final class Failure<T> implements Try<T>, Serializable`
 	* parsing integer
 	    * success
             ```
@@ -100,8 +97,6 @@
     * try with resources
         * java
             ```
-            String fileName = "NonExistingFile.txt";
-            
             String fileLines;
             try (var stream = Files.lines(Paths.get(fileName))) {
             
@@ -110,29 +105,9 @@
             ```
         * vavr
             ```
-            String fileName = "src/test/resources/lines.txt";
             Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
                             .of(stream -> stream.collect(joining(",")));
             ```
-            * success
-                ```
-                String fileName = "src/test/resources/lines.txt";
-                
-                Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
-                        .of(stream -> stream.collect(joining(",")));
-                
-                assertTrue(fileLines.isSuccess());
-                assertThat(fileLines.get(), is("1,2,3"));
-                ```
-            * failure
-                ```
-                String fileName = "NonExistingFile.txt";
-                
-                Try<String> fileLines = Try.withResources(() -> Files.lines(Paths.get(fileName)))
-                        .of(stream -> stream.collect(joining(",")));
-                
-                assertTrue(fileLines.isFailure());
-                ```
     * **workshops**: https://github.com/mtumilowicz/java11-vavr093-try-workshop
 1. Digression: `Try` is just a very handy wrapper - we still have to create exceptions and deal with its cost - maybe there is
 a structure that `(Object, Object)` with convention that on the left side we have failure and on the right - success?
